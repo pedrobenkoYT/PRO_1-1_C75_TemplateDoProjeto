@@ -17,18 +17,15 @@ export default class RideHistoryScreen extends Component {
     this.state = {
       allTransactions: [],
       lastVisibleTransaction: null,
-      searchText: "",
-      email: firebase.auth().currentUser.email
+      searchText: ""
     };
   }
   componentDidMount = async () => {
-    const { email } = this.state;
-    this.getTransactions(email);
+    this.getTransactions();
   };
 
-  getTransactions = email => {
+  getTransactions = () => {
     db.collection("transactions")
-      .where("email_id", "==", email)
       .limit(10)
       .get()
       .then(snapshot => {
@@ -41,18 +38,17 @@ export default class RideHistoryScreen extends Component {
       });
   };
 
-  handleSearch = async (bikeId, email) => {
+  handleSearch = async bikeId => {
     bikeId = bikeId.toUpperCase().trim();
     this.setState({
       allTransactions: []
     });
     if (!bikeId) {
-      this.getTransactions(email);
+      this.getTransactions();
     }
 
     db.collection("transactions")
       .where("bike_id", "==", bikeId)
-      .where("email_id", "==", email)
       .get()
       .then(snapshot => {
         snapshot.docs.map(doc => {
@@ -64,14 +60,13 @@ export default class RideHistoryScreen extends Component {
       });
   };
 
-  fetchMoreTransactions = async (bikeId, email) => {
+  fetchMoreTransactions = async bikeId => {
     bikeId = bikeId.toUpperCase().trim();
 
     const { lastVisibleTransaction, allTransactions } = this.state;
     const query = await db
       .collection("transactions")
       .where("bike_id", "==", bikeId)
-      .where("email_id", "==", email)
       .startAfter(lastVisibleTransaction)
       .limit(10)
       .get();
@@ -90,9 +85,9 @@ export default class RideHistoryScreen extends Component {
       .split(" ")
       .splice(0, 4)
       .join(" ");
-
+    
     var transactionType =
-      item.transaction_type === "rented" ? "alugada" : "retornada";
+      item.transaction_type === "rented" ? "alugada" : "devolvida";
     return (
       <View style={{ borderWidth: 1 }}>
         <ListItem key={i} bottomDivider>
@@ -102,7 +97,7 @@ export default class RideHistoryScreen extends Component {
               {`${item.bike_type} ( ${item.bike_id} )`}
             </ListItem.Title>
             <ListItem.Subtitle style={styles.subtitle}>
-              {`Essa bicicleta está ${transactionType} por você.`}
+              {`Essa bicicleta foi ${transactionType} por você.`}
             </ListItem.Subtitle>
             <View style={styles.lowerLeftContaiiner}>
               <View style={styles.transactionContainer}>
@@ -141,7 +136,7 @@ export default class RideHistoryScreen extends Component {
   };
 
   render() {
-    const { searchText, allTransactions, email } = this.state;
+    const { searchText, allTransactions } = this.state;
     return (
       <View style={styles.container}>
         <View style={styles.upperContainer}>
@@ -154,7 +149,7 @@ export default class RideHistoryScreen extends Component {
             />
             <TouchableOpacity
               style={styles.scanbutton}
-              onPress={() => this.handleSearch(searchText, email)}
+              onPress={() => this.handleSearch(searchText)}
             >
               <Text style={styles.scanbuttonText}>Pesquisar</Text>
             </TouchableOpacity>
@@ -165,7 +160,7 @@ export default class RideHistoryScreen extends Component {
             data={allTransactions}
             renderItem={this.renderItem}
             keyExtractor={(item, index) => index.toString()}
-            onEndReached={() => this.fetchMoreTransactions(searchText, email)}
+            onEndReached={() => this.fetchMoreTransactions(searchText)}
             onEndReachedThreshold={0.7}
           />
         </View>

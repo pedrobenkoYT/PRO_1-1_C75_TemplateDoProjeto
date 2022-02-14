@@ -45,8 +45,8 @@ export default class RideScreen extends Component {
     const { status } = await Permissions.askAsync(Permissions.CAMERA);
 
     this.setState({
-      /*status === "granted" is true when user has granted permission
-          status === "granted" is false when user has not granted the permission
+      /*status === "granted" é verdadeiro se o usuário concedeu permissão
+          status === "granted" é falso se o usuário não concedeu permissão
         */
       hasCameraPermissions: status === "granted",
       domState: "scanner",
@@ -162,8 +162,8 @@ export default class RideScreen extends Component {
     } else {
       bikeRef.docs.map(doc => {
         if (!doc.data().under_maintenance) {
-          //if the bike is available then transaction type will be rented
-          // otherwise it will be return
+          // se a bicicleta estiver disponível, o tipo de transação será "rented",
+          // caso contrário, será "return"
           transactionType = doc.data().is_bike_available ? "rented" : "return";
         } else {
           transactionType = "under_maintenance";
@@ -188,7 +188,7 @@ export default class RideScreen extends Component {
         bikeId: ""
       });
       isUserEligible = false;
-      Alert.alert("Invalid user id");
+      Alert.alert("ID de Usuário inválido");
     } else {
       userRef.docs.map(doc => {
         if (!doc.data().bike_assigned) {
@@ -230,7 +230,7 @@ export default class RideScreen extends Component {
   };
 
   assignBike = async (bikeId, userId, bikeType, userName, email) => {
-    //add a transaction
+    // adicionar uma transação
     db.collection("transactions").add({
       user_id: userId,
       user_name: userName,
@@ -240,27 +240,27 @@ export default class RideScreen extends Component {
       transaction_type: "rented",
       email_id: email
     });
-    //change bike status
+    // alterar status da bicicleta
     db.collection("bicycles")
       .doc(bikeId)
       .update({
         is_bike_available: false
       });
-    //change value  of bike assigned for user
+    // mudar o valor referente a bicicleta alugada pelo usuário
     db.collection("users")
       .doc(userId)
       .update({
         bike_assigned: true
       });
 
-    // Updating local state
+    // atualizando estado local
     this.setState({
       bikeId: ""
     });
   };
 
   returnBike = async (bikeId, userId, bikeType, userName, email) => {
-    //add a transaction
+    // adicionar uma transação
     db.collection("transactions").add({
       user_id: userId,
       user_name: userName,
@@ -270,20 +270,20 @@ export default class RideScreen extends Component {
       transaction_type: "return",
       email_id: email
     });
-    //change bike status
+    // alterar status da bicicleta
     db.collection("bicycles")
       .doc(bikeId)
       .update({
         is_bike_available: true
       });
-    //change value  of bike assigned for user
+    // mudar o valor referente a bicicleta alugada pelo usuário
     db.collection("users")
       .doc(userId)
       .update({
         bike_assigned: false
       });
 
-    // Updating local state
+    // atualizando estado local
     this.setState({
       bikeId: ""
     });
@@ -338,7 +338,7 @@ export default class RideScreen extends Component {
             onPress={this.handleTransaction}
           >
             <Text style={styles.buttonText}>
-              {bikeAssigned ? "Finalizar passeio" : "Desbloquear"}
+              {bikeAssigned ? "Finalizar" : "Desbloquear"}
             </Text>
           </TouchableOpacity>
         </View>
